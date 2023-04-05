@@ -1,41 +1,46 @@
 // All products
-async function getAllProducts(){
-    var response = await fetch('http://localhost:3000/api/products');
-    var AllProducts = await response.json();
-    return console.log(AllProducts);
+async function getAllProducts() {
+  var response = await fetch("http://localhost:3000/api/products");
+  var AllProducts = await response.json();
+  //AllProducts.forEach(data => { console.log('DATA::: ',data);});
+  return AllProducts;
 }
-getAllProducts(1)
 
+async function templateData(data) {
+  const products = await data; // récupère la liste de produits
 
+  // boucle à travers chaque produit pour les traiter individuellement
+  products.forEach((product) => {
+    // Template
+    const elemSection = document.getElementById("items");
+    const elemLinkProduct = document.createElement("a");
+    const elemArticle = document.createElement("article");
+    const elemImg = document.createElement("img");
+    const elemTitle = document.createElement("h3");
+    const elemParagraph = document.createElement("p");
 
+    // Décomposition de variables
+    const { _id, name, price, altTxt, colors, imageUrl, description } = product;
+    // On traitre les données
+    elemLinkProduct.setAttribute("href", `product.html?id=${_id}`);
+    elemLinkProduct.addEventListener("click", (event) => {
+      event.preventDefault(); // empêche le lien de charger une nouvelle page
+      window.location.href = elemLinkProduct.getAttribute("href"); // redirige vers la page produit associée à l'ID
+    });
+    elemImg.setAttribute("src", `${imageUrl}`);
+    elemTitle.innerText = name;
+    elemParagraph.innerText = description;
 
+    // On ajoute une balise "a" a notre section
+    elemSection.appendChild(elemLinkProduct);
+    // Balise articles
+    elemLinkProduct.appendChild(elemArticle);
+    // On entre dans la balise 'articles'
+    elemArticle.appendChild(elemImg);
+    elemArticle.appendChild(elemTitle);
+    elemArticle.appendChild(elemParagraph);
+  });
+}
 
-// Test Template home
-const sectionElement = document.createElement("section");
-const linkProductItems = document.createElement("a");
-const articleItem = document.createElement("article");
-const ImgItem = document.createElement("img");
-const TitleItem = document.createElement('h3');
-const ParagrapheItems = document.createElement('p');
+templateData(getAllProducts());
 
-// Add Attribut for items
-linkProductItems.setAttribute('href',"https://test.com");
-sectionElement.setAttribute("id","items");
-sectionElement.setAttribute("class","items");
-ImgItem.setAttribute("src","./");
-ImgItem.setAttribute("alt","text");
-TitleItem.setAttribute('class',"productName")
-ParagrapheItems.setAttribute('class','productDescription')
-
-// Ajout des balises dans les balises nécessaire.
-sectionElement.appendChild(linkProductItems);
-linkProductItems.appendChild(articleItem);
-articleItem.appendChild(ImgItem);
-articleItem.appendChild(TitleItem);
-articleItem.appendChild(ParagrapheItems)
-
-//Add text 
-ParagrapheItems.innerText = 'Product';
-
-// Ajout de notre template
-document.body.appendChild(sectionElement);
