@@ -1,12 +1,15 @@
 // All products
-async function getAllProducts() {
+export async function getAllProducts() {
   var response = await fetch("http://localhost:3000/api/products");
   var AllProducts = await response.json();
   //AllProducts.forEach(data => { console.log('DATA::: ',data);});
   return AllProducts;
 }
+// on export notre fonction pour la rendre accessible a tous nos autre fichiers
+export {getAllProducts};
 
 async function templateData(data) {
+
   const products = await data; // récupère la liste de produits
 
   // boucle à travers chaque produit pour les traiter individuellement
@@ -25,7 +28,7 @@ async function templateData(data) {
     elemLinkProduct.setAttribute("href", `product.html?id=${_id}`);
     elemLinkProduct.addEventListener("click", (event) => {
       event.preventDefault(); // empêche le lien de charger une nouvelle page
-      window.location.href = elemLinkProduct.getAttribute("href"); // redirige vers la page produit associée à l'ID
+      window.location.href = elemLinkProduct.getAttribute("href"); // redirige vers la page que l'on a attribué comme attribut
     });
     elemImg.setAttribute("src", `${imageUrl}`);
     elemTitle.innerText = name;
@@ -41,6 +44,7 @@ async function templateData(data) {
     elemArticle.appendChild(elemParagraph);
   });
 }
+//Appel a la function templateData qui attend un arguments 'data'
 
 templateData(getAllProducts());
 
