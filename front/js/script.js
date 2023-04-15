@@ -1,10 +1,10 @@
 /**
  * 
- * @param {*} hrefLink Liens de l'image
- * @param {*} nameProduct Nom du produits
- * @param {*} altTxtImg Text Alternatif de l'image 
- * @param {*} imgUrl Parametre Url 
- * @param {*} descriptionProduct description du produits 
+ * @param {String} hrefLink Liens de l'image
+ * @param {String} nameProduct Nom du produits
+ * @param {String} altTxtImg Text Alternatif de l'image 
+ * @param {String} imgUrl Parametre Url 
+ * @param {String} descriptionProduct description du produits 
  */
 
 function Template(hrefLink,nameProduct,altTxtImg,imgUrl,descriptionProduct) {
@@ -20,6 +20,7 @@ function Template(hrefLink,nameProduct,altTxtImg,imgUrl,descriptionProduct) {
     elemLinkProduct.addEventListener("click", (event) => {
         event.preventDefault(); // empêche le lien de charger une nouvelle page
         window.location.href = elemLinkProduct.getAttribute("href"); // redirige vers la page que l'on a attribué comme attribut
+  
       });
 
       elemImg.setAttribute("src", imgUrl);
@@ -43,14 +44,14 @@ function Template(hrefLink,nameProduct,altTxtImg,imgUrl,descriptionProduct) {
 
 async function getAllProducts() {
 
-  var response = await fetch("http://localhost:3000/api/products");
-  var AllProducts = await response.json();
+    const response = await fetch("http://localhost:3000/api/products");
+    const AllProducts = await response.json();
   
     AllProducts.forEach(data => {
         // Décomposition de variable    
         const { _id, name, altTxt, imageUrl, description } = data;
         //Appel a la fonctions
-        Template(`product.html?id=${_id}`,name,altTxt,imageUrl,description)
+        Template(`product.html?id=${_id}`,name, altTxt, imageUrl, description)
     });
         
 }
