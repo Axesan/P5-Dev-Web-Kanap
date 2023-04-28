@@ -1,53 +1,54 @@
 // Obtenir l'URL actuelle de la page
 const url = new URL(window.location.href);
 // Obtenir les paramètres de requête de l'URL
-const params = new URLSearchParams(url.search);
+let params = new URLSearchParams(url.search);
 // Récupérer la valeur du paramètre "id"
-const idProduct = params.get("id");
+let idProduct = params.get("id");
+
 
 /**
  * @param {String} id ID Associer au produits
  */
 async function getProductById(id) {
-  const response = await fetch(`http://localhost:3000/api/products/${id}`);
-  const allProducts = await response.json();
+  let response = await fetch(`http://localhost:3000/api/products/${id}`);
+  let allProducts = await response.json();
   console.log("Data //", allProducts);
 
-  const { imageUrl, name, price, description, colors } = allProducts;
-  // On met notre prix au bon formats
-  // On utilise .replace('.',',') pour remplacer les points par des virgules
-  const formattedPrice = (price / 100).toFixed(2).replace(".", ",");
+  let { imageUrl, name, price, description, colors } = allProducts;
+  // Appel à la fonction
+  TemplatebyId(imageUrl, name, price, description, colors);
 
-  // Submit pour ajouter au panier
-  const buttonAddToCart = document.getElementById("addToCart");
+  // Appel a notre fonction Pour l'ajout au panier  
+  let buttonAddToCart = document.getElementById("addToCart");
+  // Quantity 
+  let elemValueQuantity = document.querySelector('#quantity'); 
+  let elemColor = document.querySelector("#colors")
+ 
+console.log(elemColor);
+ 
+  buttonAddToCart.addEventListener("click",function () {
+    // ? () : 
+    // elemColor.selectedIndex  === 0 ? ):;
+    let valid = true;
+    elemColor.style.border = "none";
+    elemValueQuantity.style.border = "none";
 
-  buttonAddToCart.addEventListener("click", function () {
-    // Recupération des données de notre input quantity.
-    const inputQuantity = document.getElementById("quantity").value;
-
-    // On récupere les données du produits
-    console.log("click OK", price,name,inputQuantity);
-    console.log(inputQuantity);
-
-    // Test Local Storage 
-    try {
-        localStorage.setItem('name',name);
-        localStorage.setItem('description',description);
-
-       parseInt(localStorage.setItem('quantity',inputQuantity))
-
-       // let priceParse = parseInt(localStorage.getItem("prixProduct"));
-        
-
-        
-    } catch (error) {
-        console.log("error",error);
+    if (elemValueQuantity.value <= 0) {
+      elemValueQuantity.style.border = "2px solid red";
+      valid = false;
+    }
+    if (elemColor.selectedIndex === 0) {
+        elemColor.style.border = "2px solid red";
+        valid = false;
+    }
+    if (valid) {
+      alert("L'article "+name+" a été ajouté au panier");
+      addToCart(id,elemValueQuantity.value,elemColor.value);
+      
     }
 
-  });
+  })
 
-  // Appel à la fonction
-  TemplatebyId(imageUrl, name, formattedPrice, description, colors);
 }
 /**
  * @param {String} linkImg Liens de l'image du produit
@@ -64,14 +65,14 @@ function TemplatebyId(
   colorProduct
 ) {
   // Selector
-  const selectClassImg = document.getElementsByClassName("item__img")[0];
-  const selectTitleId = document.getElementById("title");
-  const selectPrice = document.getElementById("price");
-  const selectDescription = document.getElementById("description");
-  const selectColors = document.getElementById("colors");
+  let selectClassImg = document.querySelector(".item__img");
+  let selectTitleId = document.querySelector("#title");
+  let selectPrice = document.querySelector("#price");
+  let selectDescription = document.querySelector("#description");
+  let selectColors = document.querySelector("#colors");
 
   // element
-  const elemImg = document.createElement("img");
+  let elemImg = document.createElement("img");
 
   elemImg.setAttribute("src", linkImg);
 
@@ -81,16 +82,54 @@ function TemplatebyId(
   selectTitleId.innerText = nameProduct;
   selectPrice.innerText = priceProduct;
   selectDescription.innerText = descProduct;
-
-  colorProduct.forEach((color) => {
-    const option = document.createElement("option");
-    selectColors.value = color;
+ 
+  colorProduct.forEach((color, key) => {
+    let option = document.createElement("option");
+    //ajout d'attribut 
+    option.setAttribute("value", key);
+    
     option.innerText = color;
     selectColors.appendChild(option);
+    console.log("COLOR::",color);
+    console.log("KEY ///",key);
   });
 }
 
 // -TEST- Fonction pour ajouter au panier
-function addToCart() {}
-addToCart();
+function addToCart(productId,qty,color) {
+    
+      // Crée un objet qui représente le produit
+      let product = {
+        id: productId,
+        qty: parseInt(qty),
+        color: color
+      };
+      
+
+      // Initialise le tableau du panier (cart) à partir du local storage
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+      // Vérifie si le produit est déjà présent dans le panier
+      let existingProductIndex = -1;
+      for (let i = 0; i < cart.length; i++) {
+        if (cart[i].id === productId && cart[i].color === color) {
+          existingProductIndex = i;
+          break;
+        }
+      }
+
+      // Si le produit est déjà présent dans le panier, met à jour la quantité
+      if (existingProductIndex !== -1) {
+        cart[existingProductIndex].qty += product.qty;
+        
+      } else {
+        // Sinon, ajoute le produit au panier
+        cart.push(product);
+      }
+
+      // Sauvegarde le tableau du panier dans le local storage
+      localStorage.setItem("cart", JSON.stringify(cart));
+
+}
+
 getProductById(idProduct);
