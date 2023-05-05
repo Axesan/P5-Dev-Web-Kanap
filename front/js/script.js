@@ -50,8 +50,9 @@ async function getAllProducts() {
     AllProducts.forEach(data => {
         // Décomposition de variable    
         const { _id, name, altTxt, imageUrl, description } = data;
+        const url = `product.html?id=${_id}`;
         //Appel a la fonctions
-        Template(`product.html?id=${_id}`,name, altTxt, imageUrl, description)
+        Template(url,name, altTxt, imageUrl, description)
     });
         
 }

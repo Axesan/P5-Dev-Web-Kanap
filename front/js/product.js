@@ -95,7 +95,7 @@ function TemplatebyId(
   });
 }
 
-// -TEST- Fonction pour ajouter au panier
+//  Fonction pour ajouter au panier
 function addToCart(productId,qty,color) {
     
       // Crée un objet qui représente le produit
