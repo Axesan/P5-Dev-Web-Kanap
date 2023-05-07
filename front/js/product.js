@@ -24,11 +24,10 @@ async function getProductById(id) {
   let elemValueQuantity = document.querySelector('#quantity'); 
   let elemColor = document.querySelector("#colors")
  
-console.log(elemColor);
+  console.log(elemColor[0].value);
  
   buttonAddToCart.addEventListener("click",function () {
-    // ? () : 
-    // elemColor.selectedIndex  === 0 ? ):;
+ 
     let valid = true;
     elemColor.style.border = "none";
     elemValueQuantity.style.border = "none";
@@ -43,7 +42,9 @@ console.log(elemColor);
     }
     if (valid) {
       alert("L'article "+name+" a été ajouté au panier");
-      addToCart(id,elemValueQuantity.value,elemColor.value);
+      addToCart(id, elemValueQuantity.value, elemColor.value);
+      console.log(elemColor);
+      
       
     }
 
@@ -87,11 +88,8 @@ function TemplatebyId(
     let option = document.createElement("option");
     //ajout d'attribut 
     option.setAttribute("value", key);
-    
     option.innerText = color;
     selectColors.appendChild(option);
-    console.log("COLOR::",color);
-    console.log("KEY ///",key);
   });
 }
 
@@ -104,6 +102,8 @@ function addToCart(productId,qty,color) {
         qty: parseInt(qty),
         color: color
       };
+
+      console.log('PRODUCT COLOR function addTOcarte :::::',product.color);
       
 
       // Initialise le tableau du panier (cart) à partir du local storage

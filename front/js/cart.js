@@ -6,32 +6,34 @@ async function getProducts(id) {
 }
 
 async function getCart() {
-  let cart = JSON.parse(localStorage.getItem("cart"));
-  console.log("TOTO //", cart.length);
+  // Selections de notre boutons command
+  const buttonOrder = document.querySelector("#order")
 
+  let cart = JSON.parse(localStorage.getItem("cart"));
   // Vérifie si la variable "cart" contient des données
   if (cart && cart.length > 0) {
     // Parcours chaque élément du tableau "cart"
     for (var i = 0; i < cart.length; i++) {
-      var { name, price, imageUrl } = await getProducts(cart[i].id);
-      //console.log(urlImage);
-      // Accède aux propriétés de l'objet "product" pour chaque élément du tableau
-      console.log("Product ID:", cart[i].id);
-      console.log("Product Color:", cart[i].color);
-      console.log("Product Quantity:", cart[i].qty);
-
-      TemplateCart(name, cart[i].color, imageUrl, price, cart[i].qty);
+      TemplateCart(cart[i]);
     }
   } else {
-    console.log("Cart is empty.");
+   // On retire le boutons si le panier est vide .
+    buttonOrder.style.display = 'none';
   }
 }
 
 getCart();
 
-// fonction template
-function TemplateCart(productTitle, color, UrlImage, price, qty) {
+
+async function TemplateCart(dataCart){
+  // Decomposition de variable:
+  console.log("Data Cart",dataCart);
+  // Decomposition de variable de notre panier 
+  const {qty,color} = await dataCart
+  const {name,price,imageUrl} = await getProducts(dataCart.id);
+
   let selectSection = document.querySelector("#cart__items");
+  let selectTotauPrice = document.querySelector('#totalPrice');
   let elemArticle = document.createElement("article");
   let elemDivImg = document.createElement("div");
   let elemDivContent = document.createElement("div");
@@ -39,8 +41,9 @@ function TemplateCart(productTitle, color, UrlImage, price, qty) {
   let elemDivContentSetting = document.createElement("div");
   let elemDivContentSettingQuantity = document.createElement("div");
   let elemDivContentSettingDelete = document.createElement("div");
-
   let elemImg = document.createElement("img");
+  
+
 
   // Titre
   let titleProduct = document.createElement("h2");
@@ -49,10 +52,9 @@ function TemplateCart(productTitle, color, UrlImage, price, qty) {
   let qtyProduct = document.createElement("p");
   let inputQtyProduct = document.createElement("input");
   // SELECT ALL VALUE
-
   let deleteProduct = document.createElement("p");
-
   let nbArticle = document.querySelector("#totalQuantity");
+ 
 
   // Ajout de balise article dans section
   selectSection.appendChild(elemArticle);
@@ -61,24 +63,21 @@ function TemplateCart(productTitle, color, UrlImage, price, qty) {
   elemDivImg.appendChild(elemImg);
   elemDivContent.appendChild(elemDivContentDescription);
   elemDivContent.appendChild(elemDivContentSetting);
-
   elemDivContentDescription.appendChild(titleProduct);
   elemDivContentDescription.appendChild(colorProduct);
   elemDivContentDescription.appendChild(priceProduct);
   elemDivContentSetting.appendChild(elemDivContentSettingQuantity);
-
   elemDivContentSettingQuantity.appendChild(qtyProduct);
   elemDivContentSettingQuantity.appendChild(inputQtyProduct);
   elemDivContentSetting.appendChild(elemDivContentSettingDelete);
   elemDivContentSettingDelete.appendChild(deleteProduct);
-
   // Ajout des attribut dans la balise article
   elemArticle.setAttribute("class", "cart__item");
   elemArticle.setAttribute("data-id", "{product-ID}");
   elemArticle.setAttribute("data-color", "{product-color}");
 
   elemDivImg.setAttribute("class", "cart__item__img");
-  elemImg.setAttribute("src", UrlImage);
+ 
   elemImg.setAttribute("alt", "{product-color}");
   elemDivContentDescription.setAttribute(
     "class",
@@ -100,15 +99,43 @@ function TemplateCart(productTitle, color, UrlImage, price, qty) {
   deleteProduct.setAttribute("class", "deleteItem");
 
   // Ajout du textes
-  titleProduct.innerText = productTitle;
+  elemImg.setAttribute("src",imageUrl);
+  inputQtyProduct.value = qty;
+  titleProduct.innerText = name;
+  priceProduct.innerText = price + "€";
+  colorProduct.innerText = color;
+
   qtyProduct.innerText = "Qté:";
   deleteProduct.innerText = "Supprimer";
-  priceProduct.innerText = price += "€";
-  colorProduct.innerText = color;
-  nbArticle.innerText = "1";
-  inputQtyProduct.value = qty;
-}
 
+  let cart = JSON.parse(localStorage.getItem("cart"));
+  // Initialiser une variable de total à 0
+  let totalQuantity = 0;
+
+  // Parcourir la liste des produits et ajouter la quantité de chaque produit au total
+  cart.forEach(product => {
+    totalQuantity += product.qty; 
+  });
+  nbArticle.innerText = totalQuantity;
+  // Initialiser une variable de total à 0
+  let totalPrice = 0;
+
+  for (const product of cart) {
+    const { price } = await getProducts(product.id);
+    totalPrice += price * product.qty;
+    console.log('TOTAL PANIER: ' + totalPrice);
+  }
+  
+  selectTotauPrice.innerText = totalPrice ;
+
+
+  //Delete
+  let deleteItem = document.querySelectorAll('.deleteItem');
+ // BOUCLE SUR TOUS LES BOUTONS 
+
+
+  
+}
 /** - GESTION DES ERREUR
  * @param {string} input
  * @param {string} message
@@ -184,3 +211,14 @@ function VerifForms() {
 }
 
 VerifForms();
+
+function changeTotal() {
+  let cart = JSON.parse(localStorage.getItem("cart"));
+  // Récupérer la valeur de la clé "maCle"
+  var maValeur = localStorage.getItem("qty");
+  console.log(cart.length);
+
+// Afficher la valeur récupérée
+console.log("Function ///",maValeur);
+}
+changeTotal()
