@@ -1,3 +1,5 @@
+const cart = JSON.parse(localStorage.getItem("cart"));
+
 async function getProducts(id) {
   let response = await fetch(`http://localhost:3000/api/products/${id}`);
   let allProducts = await response.json();
@@ -9,7 +11,7 @@ async function getCart() {
   // Selections de notre boutons command
   const buttonOrder = document.querySelector("#order")
 
-  let cart = JSON.parse(localStorage.getItem("cart"));
+
   // Vérifie si la variable "cart" contient des données
   if (cart && cart.length > 0) {
     // Parcours chaque élément du tableau "cart"
@@ -22,7 +24,6 @@ async function getCart() {
   }
 }
 
-getCart();
 
 
 async function TemplateCart(dataCart){
@@ -30,7 +31,7 @@ async function TemplateCart(dataCart){
   console.log("Data Cart",dataCart);
   // Decomposition de variable de notre panier 
   const {qty,color} = await dataCart
-  const {name,price,imageUrl} = await getProducts(dataCart.id);
+  const {_id,name,price,imageUrl} = await getProducts(dataCart.id);
 
   let selectSection = document.querySelector("#cart__items");
   let selectTotauPrice = document.querySelector('#totalPrice');
@@ -42,9 +43,6 @@ async function TemplateCart(dataCart){
   let elemDivContentSettingQuantity = document.createElement("div");
   let elemDivContentSettingDelete = document.createElement("div");
   let elemImg = document.createElement("img");
-  
-
-
   // Titre
   let titleProduct = document.createElement("h2");
   let colorProduct = document.createElement("p");
@@ -73,8 +71,8 @@ async function TemplateCart(dataCart){
   elemDivContentSettingDelete.appendChild(deleteProduct);
   // Ajout des attribut dans la balise article
   elemArticle.setAttribute("class", "cart__item");
-  elemArticle.setAttribute("data-id", "{product-ID}");
-  elemArticle.setAttribute("data-color", "{product-color}");
+  elemArticle.setAttribute("data-id", _id);
+  elemArticle.setAttribute("data-color", color);
 
   elemDivImg.setAttribute("class", "cart__item__img");
  
@@ -108,45 +106,54 @@ async function TemplateCart(dataCart){
   qtyProduct.innerText = "Qté:";
   deleteProduct.innerText = "Supprimer";
 
-  let cart = JSON.parse(localStorage.getItem("cart"));
-  // Initialiser une variable de total à 0
-  let totalQuantity = 0;
-
-  // Parcourir la liste des produits et ajouter la quantité de chaque produit au total
-  cart.forEach(product => {
-    totalQuantity += product.qty; 
-  });
-  nbArticle.innerText = totalQuantity;
-  // Initialiser une variable de total à 0
-  let totalPrice = 0;
-
-  for (const product of cart) {
-    const { price } = await getProducts(product.id);
-    totalPrice += price * product.qty;
-    console.log('TOTAL PANIER: ' + totalPrice);
-  }
-  
-  selectTotauPrice.innerText = totalPrice ;
+ // Qty total + total price 
+  nbArticle.innerText = qtyTotalCart();  
+  selectTotauPrice.innerText = await totalPriceCart() ;
 
 
-  //Delete
-  let deleteItem = document.querySelectorAll('.deleteItem');
+  //- DELETE ITEMS FROM CART
+  let deleteItemCart = document.querySelectorAll('.deleteItem');
  // BOUCLE SUR TOUS LES BOUTONS 
+ // Parcourez tous les boutons "Supprimer" et ajoutez un gestionnaire d'événements click à chacun
+ deleteItemCart.forEach((button) => {
+  button.addEventListener('click', (event) => {
+    // Récupérez l'article parent du bouton "Supprimer" pour obtenir l'ID et la couleur du produit
+    const article = event.target.closest('.cart__item');
+    const productId = article.getAttribute('data-id');
+    const productColor = article.getAttribute('data-color');
+
+    // Supprimez le produit du panier en créant un nouveau panier sans cet article
+    let cart = JSON.parse(localStorage.getItem('cart'));
+    cart = cart.filter((product) => product.id !== productId || product.color !== productColor);
+    localStorage.setItem('cart', JSON.stringify(cart));
+
+    location.reload()
+    // Mettez à jour l'affichage du panier
+    //displayCart();
+  });
+});
+
 
 
   
 }
+
 /** - GESTION DES ERREUR
- * @param {string} input
- * @param {string} message
- */
-function displayErrorMessage(input, message, selectBaliseMessage) {
+* @param {string} message
+* @param {string} selectBaliseMessage
+*/
+
+function displayErrorMessage(message, selectBaliseMessage) {
   // Affiche un message d'erreur pour l'input spécifié
-  const errorMsg = input.parentElement.querySelector(selectBaliseMessage);
+  const errorMsg = document.querySelector(selectBaliseMessage);
   errorMsg.textContent = message;
   return false;
 }
 
+
+/**
+ * VERIF FORMS
+ */
 function VerifForms() {
   const buttonForm = document.querySelector("#order");
   // object regexp + msg error
@@ -173,7 +180,7 @@ function VerifForms() {
   buttonForm.addEventListener("click", function () {
     if (!dataRegexp.firstname[0].test(selectNameInput.value)) {
       displayErrorMessage(
-        selectNameInput,
+        
         dataRegexp.firstname[1],
         "#firstNameErrorMsg"
       );
@@ -181,28 +188,28 @@ function VerifForms() {
 
     if (!dataRegexp.lastname[0].test(selectFirstNameInput.value)) {
       displayErrorMessage(
-        selectFirstNameInput,
+        
         dataRegexp.lastname[1],
         "#lastNameErrorMsg"
       );
     }
     if (!dataRegexp.address[0].test(selectAddressInput.value)) {
       displayErrorMessage(
-        selectAddressInput,
+        
         dataRegexp.address[1],
         "#addressErrorMsg"
       );
     }
     if (!dataRegexp.ville[0].test(selectCityInput.value)) {
       displayErrorMessage(
-        selectCityInput,
+        
         dataRegexp.ville[1],
         "#cityErrorMsg"
       );
     }
     if (!dataRegexp.email[0].test(selectEmailInput.value)) {
       displayErrorMessage(
-        selectEmailInput,
+        
         dataRegexp.email[1],
         "#emailErrorMsg"
       );
@@ -210,10 +217,10 @@ function VerifForms() {
   });
 }
 
-VerifForms();
 
-function changeTotal() {
-  let cart = JSON.parse(localStorage.getItem("cart"));
+
+function changeTotalPrice() {
+  
   // Récupérer la valeur de la clé "maCle"
   var maValeur = localStorage.getItem("qty");
   console.log(cart.length);
@@ -221,4 +228,37 @@ function changeTotal() {
 // Afficher la valeur récupérée
 console.log("Function ///",maValeur);
 }
-changeTotal()
+
+
+function qtyTotalCart(){
+
+  // Initialiser une variable de total à 0
+  let totalArticleQuantity = 0;
+
+  // Parcourir la liste des produits et ajouter la quantité de chaque produit au total
+  cart.forEach(product => {
+    totalArticleQuantity += product.qty; 
+  });
+  return totalArticleQuantity;
+}
+/**
+ * 
+ * @returns totalPriceCart
+ */
+async function totalPriceCart(){
+    // Initialiser une variable de total à 0 - TOTAL PRICES
+    let totalPriceCart = 0;
+
+   for (const product of cart) {
+     const { price } = await getProducts(product.id);
+     totalPriceCart += price * product.qty;
+     console.log('TOTAL PANIER: ' + totalPriceCart);
+   }
+   return totalPriceCart;
+  
+}
+
+// Appel a nos fonctions 
+getCart();
+//changeTotal()
+VerifForms();
