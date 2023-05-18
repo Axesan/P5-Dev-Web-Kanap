@@ -202,9 +202,6 @@ function VerifForms() {
   });
 }
 
-async function changeTotalPrice() {
-
-}
 
 function qtyTotalCart() {
   // Initialiser une variable de total à 0
@@ -231,7 +228,7 @@ async function totalPriceCart() {
     console.log("TOTAL PANIER: " + parseInt(totalPriceCart));
   }
 
-  return totalPriceCart;
+  return parseInt(totalPriceCart);
 }
 
 // Fonction pour calculer le prix total du panier
@@ -239,10 +236,10 @@ function calculateTotalPriceDeleteProduct(cartItem) {
   let totalPrice = 0;
 
   cartItem.forEach((product) => {
-    totalPrice += parseInt(product.price);
+    totalPrice += product.price;
   });
-
-  return totalPrice;
+  console.log("NewTotalPrice",parseInt(totalPrice));
+  return parseInt(totalPrice);
 }
 
 
