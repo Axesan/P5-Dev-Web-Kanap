@@ -28,7 +28,7 @@ async function TemplateCart(dataCart,dataCartById) {
   // Decomposition de variable:
   console.log("Data Cart", dataCart);
   // Decomposition de variable de notre panier
-  const { qty, color } = await dataCart;
+  const { qty, color } =  dataCart;
   const { _id, name, price, imageUrl } = dataCartById;
 
   let selectSection = document.querySelector("#cart__items");
@@ -105,41 +105,112 @@ async function TemplateCart(dataCart,dataCartById) {
 
   // Qty total + total price
   nbArticle.innerText = qtyTotalCart();
-  selectTotauPrice.innerText = await totalPriceCart();
+  const totaux =  await totalPriceCart();
+  selectTotauPrice.innerText =parseInt(totaux)
 
   //- DELETE ITEMS FROM CART
   let deleteItemCart = document.querySelectorAll(".deleteItem");
   // Parcourez tous les boutons "Supprimer" et ajoutez un gestionnaire d'événements click à chacun
   deleteItemCart.forEach((button) => {
+
     button.addEventListener("click", (event) => {
       // Récupérez l'article parent du bouton "Supprimer" pour obtenir l'ID et la couleur du produit
       const article = event.target.closest(".cart__item");
       const productId = article.getAttribute("data-id");
       const productColor = article.getAttribute("data-color");
+      
 
       // Supprimez le produit du panier en créant un nouveau panier sans cet article
       let cart = JSON.parse(localStorage.getItem("cart"));
       cart = cart.filter(
-        (product) => product.id !== productId || product.color !== productColor
+        (product) => product.id !== productId || product.color !== productColor,
+       
       );
+      
      
-      // Rafraichis la pages
-      //location.reload();
+     
       var deleteProduct =  event.target.closest(".cart__item");
-     // deleteProduct.parentNode.removeChild(deleteProduct);
+     // Vérifier si l'élément a un parent avant de le supprimer
+     if (deleteProduct.parentNode) {
+      deleteProduct.parentNode.removeChild(deleteProduct);
+    }
       // Recalculer le prix total du panier et le mettre à jour dans l'interface utilisateur
       const totalPriceElement = document.getElementById("totalPrice");
       const totalPrice = calculateTotalPriceDeleteProduct(cart);
-      totalPriceElement.innerHTML = parseInt(totalPrice);
+      totalPriceElement.textContent = parseInt(totalPrice);
       localStorage.setItem("cart", JSON.stringify(cart));
-      // Vérifier si l'élément a un parent avant de le supprimer
-      if (deleteProduct.parentNode) {
-          deleteProduct.parentNode.removeChild(deleteProduct);
-      }
+     
       
     });
   });
     
+
+  // chang qty total to input
+  // Sélectionnez l'élément de l'input de quantité
+  const qtyInput = document.querySelectorAll(".itemQuantity");
+
+  // Ajoutez un gestionnaire d'événements pour l'événement "input"
+  // await qtyInput.addEventListener("input", (event,index) => {
+  //   // Récupérez la nouvelle quantité saisie dans l'input
+  //   const newQty = parseInt(event.target.value);
+  //   const totalPriceElement = document.getElementById("totalPrice");
+    
+  //   nbArticle.textContent = newQty;
+  //   // On verifie si la quantité n'est pas inférieur à 0
+  //   if (newQty <= 0 ) {
+  //     qtyInput.style.border = "2px solid red";
+  //     return false;
+  //   }else{
+  //     qtyInput.style.border = "none";
+  //   }
+  //   const totalPrice = calculateTotalPriceDeleteProduct(cart);
+
+  //   totalPriceElement.textContent = newQty * totalPrice
+
+  //   // Identifier l'élément spécifique que vous souhaitez mettre à jour (par exemple, en utilisant son index)
+
+  //   // Mettre à jour la quantité du produit dans le panier
+  //   if (index >= 0 && index < cart.length) {
+  //     cart[index].qty = newQty;
+  //   }
+   
+   
+  // });
+
+
+ 
+
+// Parcourez tous les inputs de quantité
+qtyInput.forEach((input, index) => {
+  // Ajoutez un gestionnaire d'événements pour l'événement "input"
+  input.addEventListener("input", (event) => {
+    // Récupérez la nouvelle quantité saisie dans l'input
+    const newQty = parseInt(event.target.value);
+    const totalPriceElement = document.getElementById("totalPrice");
+
+    // On vérifie si la quantité n'est pas inférieure à 0
+    if (newQty <= 0) {
+      input.style.border = "2px solid red";
+      return false;
+    } else {
+      input.style.border = "none";
+    }
+
+    // Mettre à jour la quantité du produit dans le panier
+    if (index >= 0 && index < cart.length) {
+      cart[index].qty = newQty;
+    }
+
+    // Mettre à jour les données dans le localStorage
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    const totalPrice = calculateTotalPriceDeleteProduct(cart);
+    totalPriceElement.textContent = totalPrice;
+    nbArticle.textContent = index;
+    
+  });
+  
+});
 }
 
 /** - GESTION DES ERREUR
@@ -217,15 +288,15 @@ function qtyTotalCart() {
  *
  * @returns totalPriceCart
  */
-async function totalPriceCart() {
+ async function totalPriceCart() {
   let totalPriceCart = 0;
 
   for (const product of cart) {
     const { price } = await getProducts(product.id);
-    const parsedPrice = parseInt(price); // Convertir le prix en entier
-    console.log('price//', parsedPrice);
-    totalPriceCart += parsedPrice * product.qty;
-    console.log("TOTAL PANIER: " + parseInt(totalPriceCart));
+ 
+    console.log('price//', price);
+    totalPriceCart += price * product.qty;
+    console.log("TOTAL PANIER: " + totalPriceCart);
   }
 
   return parseInt(totalPriceCart);
@@ -236,12 +307,22 @@ function calculateTotalPriceDeleteProduct(cartItem) {
   let totalPrice = 0;
 
   cartItem.forEach((product) => {
-    totalPrice += product.price;
-  });
-  console.log("NewTotalPrice",parseInt(totalPrice));
-  return parseInt(totalPrice);
-}
+    const { price, qty } = product;
+    const parsedPrice = parseInt(price);
+    const parsedQty = parseInt(qty);
+    console.log("Product",  product);
 
+    if (!isNaN(parsedPrice) && !isNaN(parsedQty)) {
+      totalPrice += parsedPrice * parsedQty;
+     
+    }
+
+    
+  });
+
+  
+  return totalPrice;
+}
 
 
 
