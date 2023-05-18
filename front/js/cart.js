@@ -16,7 +16,7 @@ async function getCart() {
     // Parcours chaque élément du tableau "cart"
     for (var i = 0; i < cart.length; i++) {
       var allDataCart = cart[i];
-      TemplateCart(allDataCart);
+      TemplateCart(allDataCart,await getProducts(cart[i].id));
     }
   } else {
     // On retire le boutons si le panier est vide .
@@ -24,12 +24,12 @@ async function getCart() {
   }
 }
 
-async function TemplateCart(dataCart) {
+async function TemplateCart(dataCart,dataCartById) {
   // Decomposition de variable:
   console.log("Data Cart", dataCart);
   // Decomposition de variable de notre panier
   const { qty, color } = await dataCart;
-  const { _id, name, price, imageUrl } = await getProducts(dataCart.id);
+  const { _id, name, price, imageUrl } = dataCartById;
 
   let selectSection = document.querySelector("#cart__items");
   let selectTotauPrice = document.querySelector("#totalPrice");
@@ -122,9 +122,20 @@ async function TemplateCart(dataCart) {
       cart = cart.filter(
         (product) => product.id !== productId || product.color !== productColor
       );
-      localStorage.setItem("cart", JSON.stringify(cart));
+     
       // Rafraichis la pages
-      location.reload();
+      //location.reload();
+      var deleteProduct =  event.target.closest(".cart__item");
+     // deleteProduct.parentNode.removeChild(deleteProduct);
+      // Recalculer le prix total du panier et le mettre à jour dans l'interface utilisateur
+      const totalPriceElement = document.getElementById("totalPrice");
+      const totalPrice = calculateTotalPriceDeleteProduct(cart);
+      totalPriceElement.innerHTML = parseInt(totalPrice);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      // Vérifier si l'élément a un parent avant de le supprimer
+      if (deleteProduct.parentNode) {
+          deleteProduct.parentNode.removeChild(deleteProduct);
+      }
       
     });
   });
@@ -170,6 +181,8 @@ function VerifForms() {
   const selectCityInput = document.querySelector("#city");
 
   buttonForm.addEventListener("click", function () {
+
+    
     if (!dataRegexp.firstname[0].test(selectNameInput.value)) {
       displayErrorMessage(dataRegexp.firstname[1], "#firstNameErrorMsg");
     }
@@ -208,15 +221,28 @@ function qtyTotalCart() {
  * @returns totalPriceCart
  */
 async function totalPriceCart() {
-  // Initialiser une variable de total à 0 - TOTAL PRICES
   let totalPriceCart = 0;
 
   for (const product of cart) {
     const { price } = await getProducts(product.id);
-    totalPriceCart += price * product.qty;
-    console.log("TOTAL PANIER: " + totalPriceCart);
+    const parsedPrice = parseInt(price); // Convertir le prix en entier
+    console.log('price//', parsedPrice);
+    totalPriceCart += parsedPrice * product.qty;
+    console.log("TOTAL PANIER: " + parseInt(totalPriceCart));
   }
+
   return totalPriceCart;
+}
+
+// Fonction pour calculer le prix total du panier
+function calculateTotalPriceDeleteProduct(cartItem) {
+  let totalPrice = 0;
+
+  cartItem.forEach((product) => {
+    totalPrice += parseInt(product.price);
+  });
+
+  return totalPrice;
 }
 
 
