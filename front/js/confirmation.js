@@ -1,7 +1,7 @@
 
 
-const id = new URL(window.location.href).searchParams.get("id");
-console.log('MonId',id);
+// const id = new URL(window.location.href).searchParams.get("id");
+// console.log('MonId',id);
 
 function generateUniqueNumber() {
     // Génère un nombre aléatoire entre 0 et 1
