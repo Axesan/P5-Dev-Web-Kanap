@@ -24,12 +24,12 @@ async function getCart() {
   }
 }
 
-async function TemplateCart(dataCart,dataCartById) {
+async function TemplateCart(dataCart,dataProductById) {
   // Decomposition de variable:
   console.log("Data Cart", dataCart);
   // Decomposition de variable de notre panier
   const { qty, color } =  dataCart;
-  const { _id, name, price, imageUrl } = dataCartById;
+  const { _id, name, price, imageUrl } = dataProductById;
 
   let selectSection = document.querySelector("#cart__items");
   let selectTotauPrice = document.querySelector("#totalPrice");
@@ -97,7 +97,7 @@ async function TemplateCart(dataCart,dataCartById) {
   elemImg.setAttribute("src", imageUrl);
   inputQtyProduct.value = qty;
   titleProduct.innerText = name;
-  priceProduct.innerText = price + "€";
+  priceProduct.innerText = price +   "€";
   colorProduct.innerText = color;
 
   qtyProduct.innerText = "Qté:";
@@ -126,19 +126,16 @@ async function TemplateCart(dataCart,dataCartById) {
         (product) => product.id !== productId || product.color !== productColor,
        
       );
+      localStorage.setItem("cart", JSON.stringify(cart));
       
-     
+      calculateTotalPriceDeleteProduct();
      
       var deleteProduct =  event.target.closest(".cart__item");
      // Vérifier si l'élément a un parent avant de le supprimer
      if (deleteProduct.parentNode) {
       deleteProduct.parentNode.removeChild(deleteProduct);
     }
-      // Recalculer le prix total du panier et le mettre à jour dans l'interface utilisateur
-      const totalPriceElement = document.getElementById("totalPrice");
-      const totalPrice = calculateTotalPriceDeleteProduct(cart);
-      totalPriceElement.textContent = parseInt(totalPrice);
-      localStorage.setItem("cart", JSON.stringify(cart));
+     
      
       
     });
@@ -189,12 +186,11 @@ qtyInput.forEach((input, index) => {
     const totalPriceElement = document.getElementById("totalPrice");
 
     // On vérifie si la quantité n'est pas inférieure à 0
+    input.style.border = "none";
     if (newQty <= 0) {
       input.style.border = "2px solid red";
       return false;
-    } else {
-      input.style.border = "none";
-    }
+    } 
 
     // Mettre à jour la quantité du produit dans le panier
     if (index >= 0 && index < cart.length) {
@@ -206,8 +202,8 @@ qtyInput.forEach((input, index) => {
 
     const totalPrice = calculateTotalPriceDeleteProduct(cart);
     totalPriceElement.textContent = totalPrice;
-    nbArticle.textContent = index;
-    
+
+  
   });
   
 });
@@ -296,32 +292,28 @@ function qtyTotalCart() {
  
     console.log('price//', price);
     totalPriceCart += price * product.qty;
-    console.log("TOTAL PANIER: " + totalPriceCart);
   }
 
   return parseInt(totalPriceCart);
 }
 
 // Fonction pour calculer le prix total du panier
-function calculateTotalPriceDeleteProduct(cartItem) {
+// Fonction pour calculer le prix total du panier
+async function calculateTotalPriceDeleteProduct(){
+  const cartItems = JSON.parse(localStorage.getItem("cart"));
   let totalPrice = 0;
+  let totalQty = 0;
 
-  cartItem.forEach((product) => {
-    const { price, qty } = product;
-    const parsedPrice = parseInt(price);
-    const parsedQty = parseInt(qty);
-    console.log("Product",  product);
-
-    if (!isNaN(parsedPrice) && !isNaN(parsedQty)) {
-      totalPrice += parsedPrice * parsedQty;
-     
-    }
-
+  for (const product of cartItems) {
+    const { qty, id } = product;
     
-  });
+    const infoProduct = await getProducts(id);
+    totalQty += parseInt(qty);
+    totalPrice += parseInt(infoProduct.price) * parseInt(qty);
+  }
 
-  
-  return totalPrice;
+  document.querySelector("#totalPrice").innerText = totalPrice;
+  document.querySelector("#totalQuantity").innerText = totalQty;
 }
 
 
