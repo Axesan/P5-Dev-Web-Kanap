@@ -42,7 +42,7 @@ async function getProductById(id) {
     }
     if (valid) {
       alert("L'article "+name+" a été ajouté au panier");
-      addToCart(id, elemValueQuantity.value, elemColor.value);
+      addToCart(id, elemValueQuantity.value, elemColor.options[elemColor.selectedIndex].text);
       console.log(elemColor);
       
       
@@ -94,42 +94,36 @@ function TemplatebyId(
 }
 
 //  Fonction pour ajouter au panier
-function addToCart(productId,qty,color) {
-    
-      // Crée un objet qui représente le produit
-      let product = {
-        id: productId,
-        qty: parseInt(qty),
-        color: color
-      };
+function addToCart(productId, qty, selectedColor) {
+  // Crée un objet qui représente le produit
+  let product = {
+    id: productId,
+    qty: parseInt(qty),
+    color: selectedColor
+  };
 
-      console.log('PRODUCT COLOR function addTOcarte :::::',product.color);
-      
+  // Initialise le tableau du panier (cart) à partir du local storage
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-      // Initialise le tableau du panier (cart) à partir du local storage
-      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  // Vérifie si le produit est déjà présent dans le panier
+  let existingProductIndex = -1;
+  for (let i = 0; i < cart.length; i++) {
+    if (cart[i].id === productId && cart[i].color === selectedColor) {
+      existingProductIndex = i;
+      break;
+    }
+  }
 
-      // Vérifie si le produit est déjà présent dans le panier
-      let existingProductIndex = -1;
-      for (let i = 0; i < cart.length; i++) {
-        if (cart[i].id === productId && cart[i].color === color) {
-          existingProductIndex = i;
-          break;
-        }
-      }
+  // Si le produit est déjà présent dans le panier avec la même couleur, met à jour la quantité
+  if (existingProductIndex !== -1) {
+    cart[existingProductIndex].qty += product.qty;
+  } else {
+    // Sinon, ajoute le produit au panier
+    cart.push(product);
+  }
 
-      // Si le produit est déjà présent dans le panier, met à jour la quantité
-      if (existingProductIndex !== -1) {
-        cart[existingProductIndex].qty += product.qty;
-        
-      } else {
-        // Sinon, ajoute le produit au panier
-        cart.push(product);
-      }
-
-      // Sauvegarde le tableau du panier dans le local storage
-      localStorage.setItem("cart", JSON.stringify(cart));
-
+  // Sauvegarde le tableau du panier dans le local storage
+  localStorage.setItem("cart", JSON.stringify(cart));
 }
 
 getProductById(idProduct);

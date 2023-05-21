@@ -16,7 +16,8 @@ async function getCart() {
     // Parcours chaque élément du tableau "cart"
     for (var i = 0; i < cart.length; i++) {
       var allDataCart = cart[i];
-      TemplateCart(allDataCart,await getProducts(cart[i].id));
+      var dataProductId = await getProducts(cart[i].id);
+      TemplateCart(allDataCart, dataProductId);
     }
   } else {
     // On retire le boutons si le panier est vide .
@@ -24,11 +25,11 @@ async function getCart() {
   }
 }
 
-async function TemplateCart(dataCart,dataProductById) {
+async function TemplateCart(dataCart, dataProductById) {
   // Decomposition de variable:
   console.log("Data Cart", dataCart);
   // Decomposition de variable de notre panier
-  const { qty, color } =  dataCart;
+  const { qty, color } = dataCart;
   const { _id, name, price, imageUrl } = dataProductById;
 
   let selectSection = document.querySelector("#cart__items");
@@ -97,7 +98,7 @@ async function TemplateCart(dataCart,dataProductById) {
   elemImg.setAttribute("src", imageUrl);
   inputQtyProduct.value = qty;
   titleProduct.innerText = name;
-  priceProduct.innerText = price +   "€";
+  priceProduct.innerText = price + "€";
   colorProduct.innerText = color;
 
   qtyProduct.innerText = "Qté:";
@@ -105,111 +106,69 @@ async function TemplateCart(dataCart,dataProductById) {
 
   // Qty total + total price
   nbArticle.innerText = qtyTotalCart();
-  const totaux =  await totalPriceCart();
-  selectTotauPrice.innerText =parseInt(totaux)
+  const totaux = await totalPriceCart();
+  selectTotauPrice.innerText = parseInt(totaux);
 
   //- DELETE ITEMS FROM CART
   let deleteItemCart = document.querySelectorAll(".deleteItem");
-  // Parcourez tous les boutons "Supprimer" et ajoutez un gestionnaire d'événements click à chacun
+  // Parcoure tous les boutons "Supprimer" et ajoutez un gestionnaire d'événements click à chacun
   deleteItemCart.forEach((button) => {
-
     button.addEventListener("click", (event) => {
       // Récupérez l'article parent du bouton "Supprimer" pour obtenir l'ID et la couleur du produit
       const article = event.target.closest(".cart__item");
       const productId = article.getAttribute("data-id");
       const productColor = article.getAttribute("data-color");
-      
 
       // Supprimez le produit du panier en créant un nouveau panier sans cet article
       let cart = JSON.parse(localStorage.getItem("cart"));
       cart = cart.filter(
-        (product) => product.id !== productId || product.color !== productColor,
-       
+        (product) => product.id !== productId || product.color !== productColor
       );
       localStorage.setItem("cart", JSON.stringify(cart));
-      
+
       calculateTotalPriceDeleteProduct();
-     
-      var deleteProduct =  event.target.closest(".cart__item");
-     // Vérifier si l'élément a un parent avant de le supprimer
-     if (deleteProduct.parentNode) {
-      deleteProduct.parentNode.removeChild(deleteProduct);
-    }
-     
-     
-      
+
+      var deleteProduct = event.target.closest(".cart__item");
+      // Vérifier si l'élément a un parent avant de le supprimer
+      if (deleteProduct.parentNode) {
+        deleteProduct.parentNode.removeChild(deleteProduct);
+      }
     });
   });
-    
 
   // chang qty total to input
   // Sélectionnez l'élément de l'input de quantité
   const qtyInput = document.querySelectorAll(".itemQuantity");
+  // Parcourez tous les inputs de quantité
+  qtyInput.forEach((input, index) => {
+    // Ajoutez un gestionnaire d'événements pour l'événement "input"
+    input.addEventListener("input", async (event) => {
+      // Récupérez la nouvelle quantité saisie dans l'input
+      const newQty = parseInt(event.target.value);
+      const totalPriceElement = document.getElementById("totalPrice");
 
-  // Ajoutez un gestionnaire d'événements pour l'événement "input"
-  // await qtyInput.addEventListener("input", (event,index) => {
-  //   // Récupérez la nouvelle quantité saisie dans l'input
-  //   const newQty = parseInt(event.target.value);
-  //   const totalPriceElement = document.getElementById("totalPrice");
-    
-  //   nbArticle.textContent = newQty;
-  //   // On verifie si la quantité n'est pas inférieur à 0
-  //   if (newQty <= 0 ) {
-  //     qtyInput.style.border = "2px solid red";
-  //     return false;
-  //   }else{
-  //     qtyInput.style.border = "none";
-  //   }
-  //   const totalPrice = calculateTotalPriceDeleteProduct(cart);
+      // On vérifie si la quantité n'est pas inférieure à 0
+      input.style.border = "none";
+      if (newQty <= 0) {
+        input.style.border = "2px solid red";
+        return false;
+      }
 
-  //   totalPriceElement.textContent = newQty * totalPrice
+      // Mettre à jour la quantité du produit dans le panier
+      if (index >= 0 && index < cart.length) {
+        cart[index].qty = newQty;
+      }
 
-  //   // Identifier l'élément spécifique que vous souhaitez mettre à jour (par exemple, en utilisant son index)
+      // Mettre à jour les données dans le localStorage
+      localStorage.setItem("cart", JSON.stringify(cart));
 
-  //   // Mettre à jour la quantité du produit dans le panier
-  //   if (index >= 0 && index < cart.length) {
-  //     cart[index].qty = newQty;
-  //   }
-   
-   
-  // });
-
-
- 
-
-// Parcourez tous les inputs de quantité
-qtyInput.forEach((input, index) => {
-  // Ajoutez un gestionnaire d'événements pour l'événement "input"
-  input.addEventListener("input", (event) => {
-    // Récupérez la nouvelle quantité saisie dans l'input
-    const newQty = parseInt(event.target.value);
-    const totalPriceElement = document.getElementById("totalPrice");
-
-    // On vérifie si la quantité n'est pas inférieure à 0
-    input.style.border = "none";
-    if (newQty <= 0) {
-      input.style.border = "2px solid red";
-      return false;
-    } 
-
-    // Mettre à jour la quantité du produit dans le panier
-    if (index >= 0 && index < cart.length) {
-      cart[index].qty = newQty;
-    }
-
-    // Mettre à jour les données dans le localStorage
-    localStorage.setItem("cart", JSON.stringify(cart));
-
-    const totalPrice = calculateTotalPriceDeleteProduct(cart);
-    totalPriceElement.textContent = totalPrice;
-
-  
+      const totalPrice = calculateTotalPriceDeleteProduct();
+      totalPriceElement.textContent = totalPrice;
+    });
   });
-  
-});
 }
 
-/** - GESTION DES ERREUR
+/** - GESTION DES ERREURS
  * @param {string} message
  * @param {string} selectBaliseMessage
  */
@@ -247,9 +206,18 @@ function VerifForms() {
   const selectEmailInput = document.querySelector("#email");
   const selectCityInput = document.querySelector("#city");
 
-  buttonForm.addEventListener("click", function () {
+  // Récupérer l'URL actuelle
+  const actuelURL = window.location.href;
+  // Créer un nouvel objet URLSearchParams à partir de l'URL
+  const params = new URLSearchParams(actuelURL);
+  // Récupérer les valeurs des paramètres du formulaire
+  const firstName = params.get("firstName");
+  const lastName = params.get("lastName");
+  const address = params.get("address");
+  const city = params.get("city");
+  const email = params.get("email");
 
-    
+  buttonForm.addEventListener("click", function () {
     if (!dataRegexp.firstname[0].test(selectNameInput.value)) {
       displayErrorMessage(dataRegexp.firstname[1], "#firstNameErrorMsg");
     }
@@ -266,9 +234,31 @@ function VerifForms() {
     if (!dataRegexp.email[0].test(selectEmailInput.value)) {
       displayErrorMessage(dataRegexp.email[1], "#emailErrorMsg");
     }
-  });
-}
 
+    console.log("test", {
+      firstName: firstName,
+      lastName: lastName,
+      address: address,
+      city: city,
+      email: email,
+    });
+  });
+
+  // Afficher les valeurs dans la console
+  console.log("Prénom :", firstName);
+  console.log("Nom :", lastName);
+  console.log("Adresse :", address);
+  console.log("Ville :", city);
+  console.log("Email :", email);
+
+  // return {
+  //   firstName: firstName,
+  //   lastName: lastName,
+  //   address: address,
+  //   city: city,
+  //   email: email
+  // }
+}
 
 function qtyTotalCart() {
   // Initialiser une variable de total à 0
@@ -284,29 +274,28 @@ function qtyTotalCart() {
  *
  * @returns totalPriceCart
  */
- async function totalPriceCart() {
+async function totalPriceCart() {
   let totalPriceCart = 0;
 
   for (const product of cart) {
     const { price } = await getProducts(product.id);
- 
-    console.log('price//', price);
+
+    console.log("price//", price);
     totalPriceCart += price * product.qty;
   }
 
   return parseInt(totalPriceCart);
 }
 
-// Fonction pour calculer le prix total du panier
-// Fonction pour calculer le prix total du panier
-async function calculateTotalPriceDeleteProduct(){
+// Fonction pour calculer le prix total du panier au delete
+async function calculateTotalPriceDeleteProduct() {
   const cartItems = JSON.parse(localStorage.getItem("cart"));
   let totalPrice = 0;
   let totalQty = 0;
 
   for (const product of cartItems) {
     const { qty, id } = product;
-    
+
     const infoProduct = await getProducts(id);
     totalQty += parseInt(qty);
     totalPrice += parseInt(infoProduct.price) * parseInt(qty);
@@ -315,8 +304,6 @@ async function calculateTotalPriceDeleteProduct(){
   document.querySelector("#totalPrice").innerText = totalPrice;
   document.querySelector("#totalQuantity").innerText = totalQty;
 }
-
-
 
 // Appel a nos fonctions
 getCart();
