@@ -43,7 +43,7 @@ async function getProductById(id) {
     if (valid) {
       alert("L'article "+name+" a été ajouté au panier");
       addToCart(id, elemValueQuantity.value, elemColor.options[elemColor.selectedIndex].text);
-      console.log(elemColor);
+      window.location.href = `./index.html`;
       
       
     }
@@ -109,7 +109,7 @@ function addToCart(productId, qty, selectedColor) {
   let existingProductIndex = -1;
   for (let i = 0; i < cart.length; i++) {
     if (cart[i].id === productId && cart[i].color === selectedColor) {
-      existingProductIndex = i;
+      existingProductIndex = i; // Instance +1... 
       break;
     }
   }
@@ -120,6 +120,8 @@ function addToCart(productId, qty, selectedColor) {
   } else {
     // Sinon, ajoute le produit au panier
     cart.push(product);
+   
+    
   }
 
   // Sauvegarde le tableau du panier dans le local storage
