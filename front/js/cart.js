@@ -321,7 +321,7 @@ const selectAddressInput = document.querySelector("#address");
 const selectEmailInput = document.querySelector("#email");
 const selectCityInput = document.querySelector("#city");
 
-buttonForm.addEventListener("click", async function (e) {
+buttonForm.addEventListener("click", function (e) {
   e.preventDefault(); // Evite la soumission du formulaires 
   resetErrorMessages();
 
@@ -356,6 +356,7 @@ buttonForm.addEventListener("click", async function (e) {
     // Le formulaire est valide
 
     let productConfirm = [];
+    //Les variables doivent avoir le meme nom qui il y'a dans le back
     const contact = formData();
     const products = productConfirm;
 
@@ -368,8 +369,11 @@ buttonForm.addEventListener("click", async function (e) {
       contact,
       products,
     };
+     
 
     getOrder(requestBody);
+     //On vide le panier de commande 
+     localStorage.removeItem('cart');
   } 
 });
 /**

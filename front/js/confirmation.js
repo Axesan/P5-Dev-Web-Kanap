@@ -13,6 +13,5 @@ if (cart.length <= 0) {
   
     // Génère un numéro de commande unique si le panier n'est pas vide
     selectOrderId.innerHTML = id;
-    //On vide le panier de commande 
-    localStorage.removeItem('cart');
+  
 }
