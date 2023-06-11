@@ -372,8 +372,7 @@ buttonForm.addEventListener("click", function (e) {
      
 
     getOrder(requestBody);
-     //On vide le panier de commande 
-     localStorage.removeItem('cart');
+    
   } 
 });
 /**
